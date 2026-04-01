@@ -15,10 +15,21 @@ export default function Navbar() {
   ];
 
   const resumeItems = [
+    { label: "Skills", href: "/skills" },
     { label: "Experience", href: "/experience" },
     { label: "Projects", href: "/projects" },
-    { label: "Contact", href: "/#contact" },
   ];
+
+  const setMenuHash = (open: boolean) => {
+    if (typeof window === "undefined") return;
+    if (open) {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#menu`);
+      return;
+    }
+    if (window.location.hash === "#menu") {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +47,7 @@ export default function Navbar() {
       if (!resumeRef.current) return;
       if (!resumeRef.current.contains(event.target as Node)) {
         setResumeOpen(false);
+        setMenuHash(false);
       }
     };
 
@@ -44,6 +56,7 @@ export default function Navbar() {
         setResumeOpen(false);
         setMobileOpen(false);
         setMobileResumeOpen(false);
+        setMenuHash(false);
       }
     };
 
@@ -59,6 +72,7 @@ export default function Navbar() {
   useEffect(() => {
     if (!mobileOpen) {
       setMobileResumeOpen(false);
+      setMenuHash(false);
       return;
     }
     document.body.style.overflow = "hidden";
@@ -105,12 +119,18 @@ export default function Navbar() {
           <div ref={resumeRef} className="relative hidden md:block">
             <button
               type="button"
-              onClick={() => setResumeOpen((prev) => !prev)}
+              onClick={() => {
+                setResumeOpen((prev) => {
+                  const next = !prev;
+                  setMenuHash(next);
+                  return next;
+                });
+              }}
               className="inline-flex items-center gap-2 rounded-full border border-current px-4 py-2 text-sm opacity-80 transition hover:opacity-100"
               aria-haspopup="menu"
               aria-expanded={resumeOpen}
             >
-              Resume
+              Menu
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -124,13 +144,16 @@ export default function Navbar() {
             </button>
 
             {resumeOpen && (
-              <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl border border-white/15 bg-slate-900/95 p-1 text-sm shadow-lg shadow-black/30">
+              <div className="absolute left-1/2 mt-2 w-44 -translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-slate-900/95 p-1 text-sm shadow-lg shadow-black/30">
                 {resumeItems.map((item) => (
                   <a
                     key={item.href}
                     href={item.href}
-                    onClick={() => setResumeOpen(false)}
-                    className="block rounded-xl px-3 py-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+                    onClick={() => {
+                      setResumeOpen(false);
+                      setMenuHash(false);
+                    }}
+                    className="block rounded-xl px-3 py-2 text-center text-white/80 transition hover:bg-white/10 hover:text-white"
                   >
                     {item.label}
                   </a>
@@ -187,10 +210,16 @@ export default function Navbar() {
             <button
               type="button"
               className="flex w-full items-center justify-between rounded-xl border border-white/20 px-3 py-2.5 text-sm text-white/85 transition hover:bg-white/10"
-              onClick={() => setMobileResumeOpen((prev) => !prev)}
+              onClick={() => {
+                setMobileResumeOpen((prev) => {
+                  const next = !prev;
+                  setMenuHash(next);
+                  return next;
+                });
+              }}
               aria-expanded={mobileResumeOpen}
             >
-              Resume
+              Menu
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -209,8 +238,12 @@ export default function Navbar() {
                   <a
                     key={item.href}
                     href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-xl px-3 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setMobileResumeOpen(false);
+                      setMenuHash(false);
+                    }}
+                    className="rounded-xl px-3 py-2 text-center text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
                   >
                     {item.label}
                   </a>

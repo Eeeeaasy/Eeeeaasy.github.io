@@ -102,7 +102,7 @@ export default function CharacterModel() {
           position={[0, 6, 3]}
           angle={0.35}
           penumbra={1}
-          intensity={0.9}
+          intensity={1}
         />
 
         <Suspense fallback={null}>
