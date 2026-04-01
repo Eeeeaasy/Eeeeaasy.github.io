@@ -1,13 +1,13 @@
 import Reveal from "../ui/Reveal";
 
-const experiences = [
+const inspirations = [
   {
     company: "Your Company",
     role: "Full Stack Developer",
     period: "2024 — Present",
     points: [
       "Built modern web interfaces with React, TypeScript, and Tailwind.",
-      "Improved performance, maintainability, and developer experience.",
+      "Improved performance, maintainability, and developer inspiration.",
       "Worked across frontend architecture, UI systems, and product delivery.",
     ],
   },
@@ -23,11 +23,11 @@ const experiences = [
   },
 ];
 
-export default function ExperienceSection() {
+export default function InspirationSection() {
   return (
-    <section id="experience" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
+    <section id="inspiration" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
       <div 
-        className="absolute z-[-1] hidden w-screen select-none overflow-hidden pointer-events-none md:block" 
+        className="absolute z-[-1] pointer-events-none overflow-hidden select-none w-screen" 
         style={{ left: '50%', transform: 'translateX(-50%)' }}
       >
         <div className="sticky top-0 flex h-screen w-full items-center justify-start opacity-95">
@@ -65,7 +65,7 @@ export default function ExperienceSection() {
 
       <Reveal className="max-w-2xl relative z-10 pointer-events-none">
         <p className="text-sm tracking-[0.25em] opacity-50 uppercase">
-          Experience
+          Inspiration
         </p>
         <h2 className="mt-3 text-3xl font-semibold md:text-4xl">
           Work that reflects both craft and impact.
@@ -74,7 +74,7 @@ export default function ExperienceSection() {
 
       <div className="mt-12 flex lg:justify-end relative z-10">
         <div className="w-full lg:w-[55%] space-y-6">
-          {experiences.map((item, index) => (
+          {inspirations.map((item, index) => (
             <Reveal key={`${item.company}-${item.period}`} delay={index * 140} y={26}>
               <article className="rounded-[2rem] border border-gray-500/20 bg-gray-500/10 p-6 md:p-8 backdrop-blur-md transition-colors hover:bg-gray-500/20 shadow-xl shadow-black/5">
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

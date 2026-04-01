@@ -9,13 +9,13 @@ export default function Navbar() {
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Skills", href: "/skills" },
-    { label: "Experience", href: "/experience" },
+    { label: "Inspiration", href: "/inspiration" },
     { label: "Projects", href: "/projects" },
   ];
 
   const resumeItems = [
     { label: "Skills", href: "/skills" },
-    { label: "Experience", href: "/experience" },
+    { label: "Inspiration", href: "/inspiration" },
     { label: "Projects", href: "/projects" },
   ];
 

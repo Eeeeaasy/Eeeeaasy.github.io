@@ -245,7 +245,7 @@ using use = useUsing("use")`,
   },
 };
 
-export type Experience = {
+export type Inspiration = {
   id: number;
   startDate: string;
   endDate: string;
@@ -255,7 +255,7 @@ export type Experience = {
   skills: SkillNames[];
 };
 
-export const EXPERIENCE: Experience[] = [
+export const INSPIRATION: Inspiration[] = [
   {
     id: 1,
     startDate: "Dec 2024",

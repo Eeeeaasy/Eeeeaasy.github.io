@@ -1,6 +1,6 @@
 import React from "react";
 import Hero from "./Hero";
-import ExperienceSection from "./ExperienceSection";
+import InspirationSection from "./InspirationSection";
 import ProjectsSection from "./ProjectsSection";
 import ContactSection from "./ContactSection";
 // 如果你在 index.astro 已经引入了 ColorButton，这里就不需要再引入了
@@ -20,7 +20,7 @@ export default function HomeSection() {
         {/* 如果你不想在 Home 页面显示 Skills，这里可以注释掉 */}
         {/* <SkillsSection /> */}
         
-        <ExperienceSection />
+        <InspirationSection />
         
         <ProjectsSection />
         

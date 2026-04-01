@@ -11,7 +11,7 @@ const projects = [
     title: "Project Two",
     type: "Dashboard",
     description:
-      "An internal dashboard experience with reusable UI patterns and clean data views.",
+      "An internal dashboard inspiration with reusable UI patterns and clean data views.",
   },
   {
     title: "Project Three",
