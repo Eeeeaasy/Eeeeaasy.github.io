@@ -151,7 +151,7 @@ export default function CharacterModel({ modelPath = "/models/stand.glb" }: Char
     <div className="relative h-[460px] w-full overflow-visible pointer-events-none sm:h-[700px]">
       <Canvas 
         camera={{ position: [0, isMobile ? 0.2 : 0.15, isMobile ? 8.8 : 6.2], fov: isMobile ? 42 : 32 }} 
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         // alpha: true 强制画布背景透明，彻底消除视觉硬框
         gl={{ alpha: true, antialias: true }}
       >
@@ -178,6 +178,3 @@ export default function CharacterModel({ modelPath = "/models/stand.glb" }: Char
 
 // 预加载模型，防止初次加载时闪烁
 useGLTF.preload("/models/stand.glb");
-useGLTF.preload("/models/stand2.glb");
-useGLTF.preload("/models/character.glb");
-useGLTF.preload("/models/guitar.glb");

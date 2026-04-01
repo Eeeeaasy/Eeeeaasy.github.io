@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import Reveal from "../ui/Reveal";
-import CharacterModel from "./CharacterModel";
+
+const CharacterModel = lazy(() => import("./CharacterModel"));
 
 const MODEL_PATHS = [
   "/models/stand.glb",
@@ -16,6 +17,34 @@ export default function Hero() {
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modelPath, setModelPath] = useState<(typeof MODEL_PATHS)[number]>(MODEL_PATHS[0]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const idleCallback =
+      "requestIdleCallback" in window
+        ? window.requestIdleCallback.bind(window)
+        : (cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 } as IdleDeadline), 1200);
+
+    const idleId = idleCallback(() => {
+      MODEL_PATHS.slice(1).forEach((path) => {
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.as = "fetch";
+        link.href = path;
+        link.crossOrigin = "anonymous";
+        document.head.appendChild(link);
+      });
+    });
+
+    return () => {
+      if ("cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId as number);
+      } else {
+        window.clearTimeout(idleId as number);
+      }
+    };
+  }, []);
 
   const handleRandomModel = useCallback(() => {
     setModelPath((current) => {
@@ -160,7 +189,9 @@ export default function Hero() {
         </Reveal>
 
         <Reveal delay={140} y={30} className="hidden md:block">
-          <CharacterModel modelPath={modelPath} />
+          <Suspense fallback={<div className="h-[460px] w-full sm:h-[700px]" />}>
+            <CharacterModel modelPath={modelPath} />
+          </Suspense>
         </Reveal>
       </div>
     </section>
