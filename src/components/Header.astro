@@ -1,0 +1,39 @@
+---
+const navItems = [
+  { text: '文档', href: '#', hasDropdown: false },
+  { text: '博客', href: '#', hasDropdown: false },
+  { text: '资源', href: '#', hasDropdown: true },
+  { text: '社区', href: '#', hasDropdown: true },
+  { text: '企业', href: '#', hasDropdown: true },
+];
+---
+
+<header class="w-full border-b border-white/10 bg-transparent">
+  <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    
+    <a href="/" class="flex items-center gap-2 group">
+      <svg class="w-6 h-6 text-white group-hover:opacity-80 transition-opacity" viewBox="0 0 256 329" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M127.769 0.000371281L125.79 0.697491C125.79 0.697491 80.6278 18.2573 53.6402 59.882C26.5459 101.666 18.6757 155.053 18.6757 155.053L0 286.042L116.596 230.128L127.915 258.423L139.38 230.274L256 286.042L237.324 155.053C237.324 155.053 229.454 101.666 202.36 59.882C175.372 18.2573 130.21 0.697491 130.21 0.697491L127.769 0.000371281ZM163.666 167.551L127.915 78.1189L92.1645 167.551H163.666ZM97.8093 252.338L108.318 226.064H147.512L158.021 252.338L127.915 237.893L97.8093 252.338Z" fill="currentColor"/>
+      </svg>
+      <span class="text-white font-bold text-xl tracking-wide ml-1">astro</span>
+    </a>
+
+    <nav class="hidden md:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
+      {navItems.map((item) => (
+        <a href={item.href} class="flex items-center gap-1.5 text-sm font-medium text-white/70 hover:text-white transition-colors duration-200">
+          {item.text}
+          {item.hasDropdown && (
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60 mt-0.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          )}
+        </a>
+      ))}
+    </nav>
+
+    <div class="flex items-center">
+      <a href="https://github.com/Eeeeaasy" target="_blank" class="text-white/70 hover:text-white transition-colors">
+        <svg viewBox="0 0 16 16" class="w-6 h-6" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+      </a>
+    </div>
+
+  </div>
+</header>

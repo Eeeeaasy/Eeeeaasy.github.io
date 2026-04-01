@@ -1,17 +1,38 @@
 ---
-
+import Navbar from "../components/home/Navbar";
+import HomeSection from "../components/home/HomeSection";
+import ColorButton from "../components/home/ColorButton";
+import JellyCursor from "../components/ui/JellyCursor";
+import "../styles/global.css";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Eeeeaasy! | Portfolio</title>
+    <meta
+      name="description"
+      content="Personal portfolio built with Astro and React."
+    />
+  </head>
+  
+  <!-- 核心改动 1：body 默认浅色背景，附带 dark 类时响应为暗黑背景 -->
+  <body class="bg-white text-neutral-900 antialiased transition-colors duration-500 ease-in-out dark:bg-neutral-950 dark:text-neutral-100">
+    <div class="relative min-h-screen">
+      
+      <!-- 核心改动 2：全局星空渐变背景光。白天变淡黑色以适应浅背景，夜晚变成白色提亮暗黑背景 -->
+      <div class="pointer-events-none fixed inset-0 z-0 transition-opacity duration-700 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.03),transparent_35%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_35%)]"></div>
+
+      <!-- Astro 文件中调用 React 客户端组件需要加 client:load -->
+      <Navbar client:load />
+      
+      <!-- HomeSection 包含了首页的所有主要区块 -->
+      <HomeSection client:load />
+
+      <ColorButton client:load />
+      <JellyCursor client:load />
+      
+    </div>
+  </body>
 </html>

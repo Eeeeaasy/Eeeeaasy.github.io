@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* 告诉 Tailwind v4：如果某个元素 (或其父元素) 拥有 .dark 类时，应用 dark: 变体样式 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 这是你之前原本可能有的过渡设置，也可以留着确保更流畅 */
+html, body {
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out;
+}

@@ -1,0 +1,29 @@
+---
+// 引入新版的 render 函数
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+
+export async function getStaticPaths() {
+  const blogEntries = await getCollection('blog');
+  return blogEntries.map(entry => ({
+    params: { id: entry.id }, // 这里的 slug 改成了 id
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+// 新版的 Markdown 渲染方式
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={`${entry.data.title} | 我的开源博客`}>
+  <Header />
+  <main class="container mx-auto px-4 max-w-3xl prose prose-blue">
+    <h1>{entry.data.title}</h1>
+    <div class="text-sm text-gray-500 mb-8">
+      发布于 {entry.data.pubDate.toLocaleDateString()}
+    </div>
+    <Content />
+  </main>
+</BaseLayout>

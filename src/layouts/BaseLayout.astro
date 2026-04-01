@@ -1,0 +1,14 @@
+---
+const { title = "Eeeeaasy's Blog" } = Astro.props;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-[#0d0f14] bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,50,255,0.3),rgba(255,255,255,0))] text-gray-300 font-sans min-h-screen antialiased">
+    <slot />
+  </body>
+</html>
