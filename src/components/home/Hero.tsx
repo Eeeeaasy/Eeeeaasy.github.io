@@ -21,27 +21,34 @@ export default function Hero() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const idleCallback =
-      "requestIdleCallback" in window
-        ? window.requestIdleCallback.bind(window)
-        : (cb: IdleRequestCallback) => window.setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 0 } as IdleDeadline), 1200);
-
-    const idleId = idleCallback(() => {
-      MODEL_PATHS.slice(1).forEach((path) => {
-        const link = document.createElement("link");
-        link.rel = "prefetch";
-        link.as = "fetch";
-        link.href = path;
-        link.crossOrigin = "anonymous";
-        document.head.appendChild(link);
-      });
-    });
+    const hasRequestIdleCallback = typeof window.requestIdleCallback === "function";
+    const idleId = hasRequestIdleCallback
+      ? window.requestIdleCallback(() => {
+          MODEL_PATHS.slice(1).forEach((path) => {
+            const link = document.createElement("link");
+            link.rel = "prefetch";
+            link.as = "fetch";
+            link.href = path;
+            link.crossOrigin = "anonymous";
+            document.head.appendChild(link);
+          });
+        })
+      : window.setTimeout(() => {
+          MODEL_PATHS.slice(1).forEach((path) => {
+            const link = document.createElement("link");
+            link.rel = "prefetch";
+            link.as = "fetch";
+            link.href = path;
+            link.crossOrigin = "anonymous";
+            document.head.appendChild(link);
+          });
+        }, 1200);
 
     return () => {
-      if ("cancelIdleCallback" in window) {
+      if (hasRequestIdleCallback && typeof window.cancelIdleCallback === "function") {
         window.cancelIdleCallback(idleId as number);
       } else {
-        window.clearTimeout(idleId as number);
+        clearTimeout(idleId as number);
       }
     };
   }, []);
