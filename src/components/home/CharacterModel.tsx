@@ -1,13 +1,13 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, useGLTF } from "@react-three/drei";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { Group, Object3D } from "three";
 import * as THREE from "three"; // 引入 THREE 用于数学计算
 
 // 1. 提取全局鼠标坐标，摆脱局部 div 的限制，实现全屏无缝跟随
 const globalMouse = { x: 0, y: 0 };
 
-function Avatar() {
+function Avatar({ isMobile }: { isMobile: boolean }) {
   // 使用新的模型路径，请确保你的文件路径是正确的
   const { scene } = useGLTF("/models/stand.glb");
 
@@ -64,8 +64,8 @@ useFrame(() => {
   return (
     <group
       ref={rootRef}
-      scale={3}
-      position={[0, -1.5, 0]}
+      scale={isMobile ? 2.2 : 3}
+      position={[0, isMobile ? -1.12 : -1.5, 0]}
       rotation={[0, 0.08, 0]}
     >
       <primitive object={scene} />
@@ -74,6 +74,17 @@ useFrame(() => {
 }
 
 export default function CharacterModel() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(media.matches);
+
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
   // 在最外层监听一次鼠标，并将标准化坐标同步给全局变量
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -88,9 +99,9 @@ export default function CharacterModel() {
 
   return (
     // pointer-events-none 是关键：确保 Canvas 容器不会阻挡底下网页内容（如按钮、文字）的点击事件
-    <div className="relative h-[700px] w-full overflow-visible pointer-events-none">
+    <div className="relative h-[460px] w-full overflow-visible pointer-events-none sm:h-[700px]">
       <Canvas 
-        camera={{ position: [0, 0.15, 6.2], fov: 32 }} 
+        camera={{ position: [0, isMobile ? 0.2 : 0.15, isMobile ? 8.8 : 6.2], fov: isMobile ? 42 : 32 }} 
         dpr={[1, 2]}
         // alpha: true 强制画布背景透明，彻底消除视觉硬框
         gl={{ alpha: true, antialias: true }}
@@ -108,7 +119,7 @@ export default function CharacterModel() {
         <Suspense fallback={null}>
           {/* Float 组件让模型有轻微的呼吸/悬浮感 */}
           <Float speed={1.5} rotationIntensity={0} floatIntensity={0.8}>
-            <Avatar />
+            <Avatar isMobile={isMobile} />
           </Float>
         </Suspense>
       </Canvas>
