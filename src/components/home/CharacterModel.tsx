@@ -7,9 +7,59 @@ import * as THREE from "three"; // 引入 THREE 用于数学计算
 // 1. 提取全局鼠标坐标，摆脱局部 div 的限制，实现全屏无缝跟随
 const globalMouse = { x: 0, y: 0 };
 
-function Avatar({ isMobile }: { isMobile: boolean }) {
+const MODEL_PRESETS: Record<
+  string,
+  {
+    desktopX: number;
+    mobileX: number;
+    desktopScale: number;
+    mobileScale: number;
+    desktopY: number;
+    mobileY: number;
+  }
+> = {
+  "/models/stand.glb": {
+    desktopX: 0,
+    mobileX: 0,
+    desktopScale: 3,
+    mobileScale: 2.2,
+    desktopY: -1.4,
+    mobileY: -1.12,
+  },
+  "/models/stand2.glb": {
+    desktopX: -0.1,
+    mobileX: 0,
+    desktopScale: 3,
+    mobileScale: 1.9,
+    desktopY: -1.38,
+    mobileY: -1.02,
+  },
+  "/models/character.glb": {
+    desktopX: 0,
+    mobileX: 0,
+    desktopScale: 2.6,
+    mobileScale: 2.15,
+    desktopY: -1,
+    mobileY: -1.0,
+  },
+  "/models/guitar.glb": {
+    desktopX: -0.1,
+    mobileX: 0.22,
+    desktopScale: 2.5,
+    mobileScale: 2.28,
+    desktopY: -1,
+    mobileY: -1.08,
+  },
+};
+
+type CharacterModelProps = {
+  modelPath?: string;
+};
+
+function Avatar({ isMobile, modelPath }: { isMobile: boolean; modelPath: string }) {
   // 使用新的模型路径，请确保你的文件路径是正确的
-  const { scene } = useGLTF("/models/stand.glb");
+  const { scene } = useGLTF(modelPath);
+  const preset = MODEL_PRESETS[modelPath] ?? MODEL_PRESETS["/models/stand.glb"];
 
   const rootRef = useRef<Group>(null);
   const headRef = useRef<Object3D | null>(null);
@@ -64,16 +114,15 @@ useFrame(() => {
   return (
     <group
       ref={rootRef}
-      scale={isMobile ? 2.2 : 3}
-      position={[0, isMobile ? -1.12 : -1.5, 0]}
+      scale={isMobile ? preset.mobileScale : preset.desktopScale}
+      position={[isMobile ? preset.mobileX : preset.desktopX, isMobile ? preset.mobileY : preset.desktopY, 0]}
       rotation={[0, 0.08, 0]}
     >
       <primitive object={scene} />
     </group>
   );
 }
-
-export default function CharacterModel() {
+export default function CharacterModel({ modelPath = "/models/stand.glb" }: CharacterModelProps) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -119,7 +168,7 @@ export default function CharacterModel() {
         <Suspense fallback={null}>
           {/* Float 组件让模型有轻微的呼吸/悬浮感 */}
           <Float speed={1.5} rotationIntensity={0} floatIntensity={0.8}>
-            <Avatar isMobile={isMobile} />
+            <Avatar isMobile={isMobile} modelPath={modelPath} />
           </Float>
         </Suspense>
       </Canvas>
@@ -129,3 +178,6 @@ export default function CharacterModel() {
 
 // 预加载模型，防止初次加载时闪烁
 useGLTF.preload("/models/stand.glb");
+useGLTF.preload("/models/stand2.glb");
+useGLTF.preload("/models/character.glb");
+useGLTF.preload("/models/guitar.glb");

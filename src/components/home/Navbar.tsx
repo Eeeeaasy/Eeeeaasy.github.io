@@ -4,7 +4,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [resumeOpen, setResumeOpen] = useState(false);
-  const [mobileResumeOpen, setMobileResumeOpen] = useState(false);
   const resumeRef = useRef<HTMLDivElement | null>(null);
 
   const navItems = [
@@ -55,7 +54,6 @@ export default function Navbar() {
       if (event.key === "Escape") {
         setResumeOpen(false);
         setMobileOpen(false);
-        setMobileResumeOpen(false);
         setMenuHash(false);
       }
     };
@@ -71,7 +69,6 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!mobileOpen) {
-      setMobileResumeOpen(false);
       setMenuHash(false);
       return;
     }
@@ -166,7 +163,13 @@ export default function Navbar() {
           <button
             type="button"
             className="inline-flex items-center rounded-full border border-white/30 px-3 py-2 text-sm opacity-85 transition hover:opacity-100 md:hidden"
-            onClick={() => setMobileOpen((prev) => !prev)}
+            onClick={() => {
+              setMobileOpen((prev) => {
+                const next = !prev;
+                setMenuHash(next);
+                return next;
+              });
+            }}
             aria-expanded={mobileOpen}
             aria-label="Toggle menu"
           >
@@ -190,7 +193,10 @@ export default function Navbar() {
       >
         <div
           className="fixed inset-0 top-16 bg-slate-950/55 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
+          onClick={() => {
+            setMobileOpen(false);
+            setMenuHash(false);
+          }}
         />
         <div className="absolute left-4 right-4 top-[4.5rem] rounded-2xl border border-white/15 bg-slate-900/95 p-4 shadow-xl shadow-black/30">
           <nav className="flex flex-col gap-1">
@@ -198,59 +204,16 @@ export default function Navbar() {
               <a
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
+                onClick={() => {
+                  setMobileOpen(false);
+                  setMenuHash(false);
+                }}
                 className="rounded-xl px-3 py-2.5 text-sm text-white/85 transition hover:bg-white/10 hover:text-white"
               >
                 {item.label}
               </a>
             ))}
           </nav>
-
-          <div className="mt-3 border-t border-white/10 pt-3">
-            <button
-              type="button"
-              className="flex w-full items-center justify-between rounded-xl border border-white/20 px-3 py-2.5 text-sm text-white/85 transition hover:bg-white/10"
-              onClick={() => {
-                setMobileResumeOpen((prev) => {
-                  const next = !prev;
-                  setMenuHash(next);
-                  return next;
-                });
-              }}
-              aria-expanded={mobileResumeOpen}
-            >
-              Menu
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className={`h-3.5 w-3.5 transition-transform ${mobileResumeOpen ? "rotate-180" : ""}`}
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-
-            {mobileResumeOpen && (
-              <div className="mt-2 flex flex-col gap-1">
-                {resumeItems.map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => {
-                      setMobileOpen(false);
-                      setMobileResumeOpen(false);
-                      setMenuHash(false);
-                    }}
-                    className="rounded-xl px-3 py-2 text-center text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </header>

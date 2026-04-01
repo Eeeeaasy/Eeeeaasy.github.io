@@ -27,7 +27,7 @@ export default function ExperienceSection() {
   return (
     <section id="experience" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
       <div 
-        className="absolute z-[-1] pointer-events-none overflow-hidden select-none w-screen" 
+        className="absolute z-[-1] hidden w-screen select-none overflow-hidden pointer-events-none md:block" 
         style={{ left: '50%', transform: 'translateX(-50%)' }}
       >
         <div className="sticky top-0 flex h-screen w-full items-center justify-start opacity-95">

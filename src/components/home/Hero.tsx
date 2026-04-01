@@ -2,12 +2,33 @@ import { useState, useEffect, useCallback } from "react";
 import Reveal from "../ui/Reveal";
 import CharacterModel from "./CharacterModel";
 
+const MODEL_PATHS = [
+  "/models/stand.glb",
+  "/models/stand2.glb",
+  "/models/character.glb",
+  "/models/guitar.glb",
+] as const;
+
 export default function Hero() {
   const [hitokoto, setHitokoto] = useState("Loading...");
   const [from, setFrom] = useState("");
   // 新增：记录是否喜欢、是否正在加载的状态
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [modelPath, setModelPath] = useState<(typeof MODEL_PATHS)[number]>(MODEL_PATHS[0]);
+
+  const handleRandomModel = useCallback(() => {
+    setModelPath((current) => {
+      if (MODEL_PATHS.length <= 1) return current;
+
+      let next = current;
+      while (next === current) {
+        const randomIndex = Math.floor(Math.random() * MODEL_PATHS.length);
+        next = MODEL_PATHS[randomIndex];
+      }
+      return next;
+    });
+  }, []);
 
   // 将提取数据逻辑封装为单一函数，便于复用
   const fetchHitokoto = useCallback(async () => {
@@ -50,7 +71,7 @@ export default function Hero() {
       <div className="grid w-full gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <Reveal className="max-w-3xl" delay={0}>
           <p className="mb-6 text-xs tracking-[0.4em] opacity-50 uppercase">
-            Full Stack Developer
+            收集无数灵感并将它们变成现实的过程，才是代码的灵魂。
           </p>
 
                     {/* 使用 font-serif (衬线体) 和 font-medium，适当减小一点点压迫感极强的字号，并放宽行高 */}
@@ -118,8 +139,7 @@ export default function Hero() {
           </div>
 
           <p className="mt-8 max-w-xl text-base leading-7 opacity-60 md:text-lg">
-            I’m Your Name, a developer focused on building modern web products,
-            developer-friendly interfaces, and polished personal experiences.
+            I’m YiRui, you can call me Easy! 
           </p>
 
           <div className="mt-10 flex gap-4">
@@ -127,19 +147,20 @@ export default function Hero() {
               href="#projects"
               className="rounded-full border-2 border-current px-6 py-3 text-sm font-medium transition hover:opacity-70"
             >
-              View Projects
+              一些想法
             </a>
-            <a
-              href="#contact"
-              className="rounded-full border border-current opacity-50 px-6 py-3 text-sm transition hover:opacity-100"
+            <button
+              type="button"
+              onClick={handleRandomModel}
+              className="hidden rounded-full border border-current px-6 py-3 text-sm opacity-65 transition hover:opacity-100 md:inline-block"
             >
-              Contact Me
-            </a>
+              更换形象
+            </button>
           </div>
         </Reveal>
 
-        <Reveal delay={140} y={30}>
-          <CharacterModel />
+        <Reveal delay={140} y={30} className="hidden md:block">
+          <CharacterModel modelPath={modelPath} />
         </Reveal>
       </div>
     </section>
