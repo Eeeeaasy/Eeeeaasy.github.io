@@ -180,10 +180,10 @@ export default function Hero() {
 
           <div className="mt-10 flex gap-4">
             <a
-              href="#projects"
+              href="/inspiration"
               className="rounded-full border-2 border-current px-6 py-3 text-sm font-medium transition hover:opacity-70"
             >
-              一些想法
+              一些灵感
             </a>
             <button
               type="button"
