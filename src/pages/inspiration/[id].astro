@@ -45,11 +45,11 @@ const { prevId, nextId } = getAdjacentCardIds(card.id);
         </section>
 
         <div class="pointer-events-none opacity-90">
-          <InspirationPageSection client:load />
+          <InspirationPageSection client:idle />
         </div>
 
         <InspirationCardEditor
-          client:load
+          client:idle
           cardId={card.id}
           defaultTitle={card.label ?? `Card ${card.id}`}
           defaultBody="在这里写下你的灵感内容..."
@@ -61,8 +61,8 @@ const { prevId, nextId } = getAdjacentCardIds(card.id);
         />
       </main>
 
-      <ColorButton client:load />
-      <JellyCursor client:load />
+      <ColorButton client:idle />
+      <JellyCursor client:idle />
     </div>
   </body>
 </html>

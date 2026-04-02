@@ -1,4 +1,5 @@
 import Reveal from "../ui/Reveal";
+import { useEffect, useRef, useState } from "react";
 
 const inspirations = [
   {
@@ -24,8 +25,39 @@ const inspirations = [
 ];
 
 export default function InspirationSection() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoActive, setVideoActive] = useState(false);
+
+  useEffect(() => {
+    if (!sectionRef.current || typeof window === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setVideoActive(true);
+        observer.disconnect();
+      },
+      { rootMargin: "320px 0px" }
+    );
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!videoActive || !videoRef.current) return;
+    videoRef.current.load();
+    const playPromise = videoRef.current.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Ignore autoplay rejections; user interaction can start playback later.
+      });
+    }
+  }, [videoActive]);
+
   return (
-    <section id="inspiration" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
+    <section ref={sectionRef} id="inspiration" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
       <div 
         className="absolute inset-x-0 z-[-1] pointer-events-none select-none"
       >
@@ -35,17 +67,20 @@ export default function InspirationSection() {
               出现时: delay-500 延时0.5秒等背景变白, 然后 duration-1000 缓慢出现
               消失时: dark:delay-0 dark:duration-0 切黑夜时立马隐身
           */}
-          <video 
+          <video
+            ref={videoRef}
             className="w-[200%] md:w-[80vw] lg:w-[55vw] absolute object-cover -ml-24 md:-ml-28 lg:-ml-85 -mt-20 lg:-mt-32 !outline-none !border-none !ring-0 focus:outline-none focus:ring-0 select-none pointer-events-none transition-opacity duration-1000 delay-300 dark:duration-0 dark:delay-0 opacity-100 dark:opacity-0" 
-            autoPlay 
+            autoPlay={videoActive}
             playsInline 
             loop 
             muted
+            preload="none"
             disablePictureInPicture 
             disableRemotePlayback
             tabIndex={-1}
           >
-            <source src="/videos/video.mp4" type="video/mp4" />
+            {videoActive && <source src="/videos/video.webm" type="video/webm" />}
+            {videoActive && <source src="/videos/video.mp4" type="video/mp4" />}
           </video>
 
           {/* 【夜晚的图片】 

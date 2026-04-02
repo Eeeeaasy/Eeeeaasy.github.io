@@ -17,39 +17,29 @@ export default function Hero() {
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [modelPath, setModelPath] = useState<(typeof MODEL_PATHS)[number]>(MODEL_PATHS[0]);
+  const [showModel, setShowModel] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const hasRequestIdleCallback = typeof window.requestIdleCallback === "function";
-    const idleId = hasRequestIdleCallback
-      ? window.requestIdleCallback(() => {
-          MODEL_PATHS.slice(1).forEach((path) => {
-            const link = document.createElement("link");
-            link.rel = "prefetch";
-            link.as = "fetch";
-            link.href = path;
-            link.crossOrigin = "anonymous";
-            document.head.appendChild(link);
-          });
-        })
-      : window.setTimeout(() => {
-          MODEL_PATHS.slice(1).forEach((path) => {
-            const link = document.createElement("link");
-            link.rel = "prefetch";
-            link.as = "fetch";
-            link.href = path;
-            link.crossOrigin = "anonymous";
-            document.head.appendChild(link);
-          });
-        }, 1200);
+    const desktopMedia = window.matchMedia("(min-width: 768px)");
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    const isDataSaver = Boolean(connection?.saveData);
+    const isSlowNetwork = /(^|-)2g$/.test(connection?.effectiveType ?? "");
+
+    if (!desktopMedia.matches || isDataSaver || isSlowNetwork) {
+      setShowModel(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowModel(true);
+    }, 900);
 
     return () => {
-      if (hasRequestIdleCallback && typeof window.cancelIdleCallback === "function") {
-        window.cancelIdleCallback(idleId as number);
-      } else {
-        clearTimeout(idleId as number);
-      }
+      window.clearTimeout(timer);
     };
   }, []);
 
@@ -196,9 +186,13 @@ export default function Hero() {
         </Reveal>
 
         <Reveal delay={140} y={30} className="hidden md:block">
-          <Suspense fallback={<div className="h-[460px] w-full sm:h-[700px]" />}>
-            <CharacterModel modelPath={modelPath} />
-          </Suspense>
+          {showModel ? (
+            <Suspense fallback={<div className="h-[460px] w-full sm:h-[700px]" />}>
+              <CharacterModel modelPath={modelPath} />
+            </Suspense>
+          ) : (
+            <div className="h-[460px] w-full sm:h-[700px]" />
+          )}
         </Reveal>
       </div>
     </section>
