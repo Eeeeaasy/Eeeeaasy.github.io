@@ -5,8 +5,7 @@ export default function InspirationPageSection() {
   return (
     <section id="inspiration" className="relative flex-1 min-h-0 overflow-visible outline-none focus:outline-none">
       <div
-        className="absolute z-[-1] pointer-events-none overflow-hidden select-none w-screen"
-        style={{ left: "40%", transform: "translateX(-45%)" }}
+        className="absolute z-[-1] pointer-events-none overflow-hidden select-none w-screen left-1/2 -translate-x-1/2 lg:left-[40%] lg:-translate-x-[45%]"
       >
         <div className="sticky top-0 flex h-screen w-full items-center justify-start opacity-95">
           <video
@@ -31,9 +30,9 @@ export default function InspirationPageSection() {
         </div>
       </div>
 
-      <div className="mt-4 flex lg:justify-end relative z-10 overflow-visible">
-        <Reveal className="w-full lg:w-[90%] lg:translate-x-[15%]" y={26}>
-          <MonochromeLineFlow className="aspect-[2/1] w-full" />
+      <div className="relative z-10 mt-4 flex justify-center lg:justify-end overflow-visible">
+        <Reveal className="w-full max-w-[960px] lg:max-w-[min(86vw,960px)] lg:ml-auto lg:translate-x-0" y={26}>
+          <MonochromeLineFlow className="aspect-[2/1] w-full max-w-full" />
         </Reveal>
       </div>
     </section>

@@ -1,76 +1,65 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { INSPIRATION_CARDS, type InspirationCard } from "../data/inspirationCards";
 
 type MonochromeLineFlowProps = {
   className?: string;
 };
 
-// 手动调整卡片尺寸只需要改这两个常量。
-const CARD_WIDTH = 60;
-const CARD_HEIGHT_PERCENT = 45;
-
-// 手动调整“整齐斜排”布局：
 // 以容器中心为锚点：无论收紧或展开，整组中心位置不变。
-// top = STACK_CENTER_Y - CARD_HEIGHT_PERCENT / 2 + relativeIndex * topStep
-// left = STACK_BASE_LEFT + relativeIndex * leftStep
 const STACK_CENTER_Y = 50;
-const STACK_TOP_STEP = 6;
-const STACK_BASE_LEFT = 50 - CARD_WIDTH / 2;
-const STACK_LEFT_STEP = 1.4;
+const DEFAULT_CONTAINER_WIDTH = 980;
+const DEFAULT_CONTAINER_HEIGHT = 480;
+const OPEN_SNAPSHOT_KEY = "inspiration-open-snapshot-v1";
 
-// 收紧状态参数（鼠标离开大框时使用）
-const COLLAPSED_TOP_STEP = 2.2;
-const COLLAPSED_LEFT_STEP = 0.35;
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-type Card = {
-  id: number;
-  notch: number;
-  label?: string;
-  darkLabel?: boolean;
-  duration: number;
-  delay: number;
-};
-
-const CARDS: Card[] = [
-  { id: 1, notch: 20, label: "229", duration: 8.6, delay: -1.8 },
-  { id: 2, notch: 22, label: "belie", duration: 9.1, delay: -2.4 },
-  { id: 3, notch: 16, label: "B115. ", darkLabel: true, duration: 9.8, delay: -0.9 },
-  { id: 4, notch: 18, label: "unfinished", duration: 10.3, delay: -1.5 },
-  { id: 5, notch: 26, label: "DiDuTing", duration: 8.9, delay: -2.2 },
-  { id: 6, notch: 23, label: "Max!power!", duration: 9.5, delay: -1.1 },
-  { id: 7, notch: 36, label: "Usually, learning a new language can expand possibilities.", duration: 10.8, delay: -2.8 },
-  { id: 8, notch: 18, label: "229. Hahahaha!", darkLabel: true, duration: 9.7, delay: -1.6 },
-  { id: 9, notch: 20, label: "Relax!", duration: 8.4, delay: -0.7 },
-//   { id: 10, top: 71, width: 82, left: 9, notch: 24, label: "spirit", duration: 9.9, delay: -2.6 },
-//   { id: 11, top: 78, width: 80, left: 10, notch: 30, label: "student", duration: 8.8, delay: -1.9 },
-//   { id: 12, top: 85, width: 78, left: 11, notch: 17, label: "757. Ha,He", darkLabel: true, duration: 10.2, delay: -2.1 },
-];
 
 function FolderCard({
   card,
   topStep,
   leftStep,
   middleIndex,
+  cardWidth,
+  cardHeight,
+  stackBaseLeft,
 }: {
-  card: Card;
+  card: InspirationCard;
   topStep: number;
   leftStep: number;
   middleIndex: number;
+  cardWidth: number;
+  cardHeight: number;
+  stackBaseLeft: number;
 }) {
   const tabLeft = Math.max(5, Math.min(70, card.notch));
   const relativeIndex = card.id - 1 - middleIndex;
-  const cardTop = STACK_CENTER_Y - CARD_HEIGHT_PERCENT / 2 + relativeIndex * topStep;
+  const cardTop = STACK_CENTER_Y - cardHeight / 2 + relativeIndex * topStep;
   const cardLeft = relativeIndex * leftStep;
 
   return (
-    <div
+    <a
       className={`mlf-card mlf-card-${card.id} absolute cursor-pointer`}
+      href={`/inspiration/${card.id}`}
+      data-astro-prefetch
       style={{
         top: `${cardTop}%`,
-        left: `calc(${STACK_BASE_LEFT}% + ${cardLeft}%)`,
-        // 手动调整卡片宽度：改上面的 CARD_WIDTH。
-        width: `${CARD_WIDTH}%`,
-        // 手动调整卡片高度：改上面的 CARD_HEIGHT_PERCENT。
-        height: `${CARD_HEIGHT_PERCENT}%`,
+        left: `calc(${stackBaseLeft}% + ${cardLeft}%)`,
+        width: `${cardWidth}%`,
+        height: `${cardHeight}%`,
+      }}
+      aria-label={`Open inspiration card ${card.id}`}
+      onClick={(event) => {
+        if (typeof window === "undefined") return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const payload = {
+          id: card.id,
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+          ts: Date.now(),
+        };
+        window.sessionStorage.setItem(OPEN_SNAPSHOT_KEY, JSON.stringify(payload));
       }}
     >
       <div className="mlf-card-inner absolute inset-0 transition-transform duration-200 ease-out">
@@ -100,31 +89,82 @@ function FolderCard({
           </p>
         )}
       </div>
-    </div>
+    </a>
   );
 }
 
 export default function MonochromeLineFlow({ className = "" }: MonochromeLineFlowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const topStep = isExpanded ? STACK_TOP_STEP : COLLAPSED_TOP_STEP;
-  const leftStep = isExpanded ? STACK_LEFT_STEP : COLLAPSED_LEFT_STEP;
-  const middleIndex = (CARDS.length - 1) / 2;
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [containerSize, setContainerSize] = useState({
+    width: DEFAULT_CONTAINER_WIDTH,
+    height: DEFAULT_CONTAINER_HEIGHT,
+  });
+
+  useEffect(() => {
+    if (!rootRef.current || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const width = Math.round(entry.contentRect.width);
+      const height = Math.round(entry.contentRect.height);
+
+      if (width > 0 && height > 0) {
+        setContainerSize({ width, height });
+      }
+    });
+
+    observer.observe(rootRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const layout = useMemo(() => {
+    const widthFactor = clamp((containerSize.width - 640) / 560, 0, 1);
+    const heightFactor = clamp((containerSize.height - 320) / 220, 0, 1);
+    const factor = Math.min(widthFactor, heightFactor);
+
+    const cardWidth = 46 + factor * 14;
+    const cardHeight = 38 + factor * 7;
+    const expandedTopStep = 4.2 + factor * 1.8;
+    const expandedLeftStep = 0.8 + factor * 0.6;
+    const collapsedTopStep = 1.4 + factor * 0.8;
+    const collapsedLeftStep = 0.2 + factor * 0.15;
+    const stackBaseLeft = 50 - cardWidth / 2;
+
+    return {
+      cardWidth,
+      cardHeight,
+      expandedTopStep,
+      expandedLeftStep,
+      collapsedTopStep,
+      collapsedLeftStep,
+      stackBaseLeft,
+    };
+  }, [containerSize.height, containerSize.width]);
+
+  const topStep = isExpanded ? layout.expandedTopStep : layout.collapsedTopStep;
+  const leftStep = isExpanded ? layout.expandedLeftStep : layout.collapsedLeftStep;
+  const middleIndex = (INSPIRATION_CARDS.length - 1) / 2;
 
   return (
     <div
+      ref={rootRef}
       className={`relative overflow-hidden rounded-[1.6rem] border border-black/15 bg-[#f5f5f5] dark:border-white/20 dark:bg-neutral-900 ${className}`}
-      aria-hidden="true"
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
 
-      {CARDS.map((card) => (
+      {INSPIRATION_CARDS.map((card) => (
         <FolderCard
           key={card.id}
           card={card}
           topStep={topStep}
           leftStep={leftStep}
           middleIndex={middleIndex}
+          cardWidth={layout.cardWidth}
+          cardHeight={layout.cardHeight}
+          stackBaseLeft={layout.stackBaseLeft}
         />
       ))}
 
@@ -143,7 +183,7 @@ export default function MonochromeLineFlow({ className = "" }: MonochromeLineFlo
         .mlf-card:hover .mlf-card-inner {
           transform: translateY(-14px);
         }
-        ${CARDS.map(
+        ${INSPIRATION_CARDS.map(
           (card) => `.mlf-card-${card.id} { animation-duration: ${card.duration}s; animation-delay: ${card.delay}s; }`
         ).join("")}
         @keyframes mlfFloat {

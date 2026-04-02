@@ -13,7 +13,8 @@ const getScale = (dx: number, dy: number) => {
 
 const getAngle = (dx: number, dy: number) => (Math.atan2(dy, dx) * 180) / Math.PI;
 
-const BASE_SIZE = 40;
+const BASE_SIZE = 32;
+const PARTICLE_COUNT = 12;
 
 export default function JellyCursor() {
 	const [enabled, setEnabled] = useState(false);
@@ -23,6 +24,7 @@ export default function JellyCursor() {
 	const targetRef = useRef<Vec>({ x: 0, y: 0 });
 	const dotRef = useRef<HTMLDivElement | null>(null);
 	const blobRef = useRef<HTMLDivElement | null>(null);
+	const particleRefs = useRef<(HTMLDivElement | null)[]>([]);
 
 	const posRef = useRef<Vec>({ x: 0, y: 0 });
 	const velRef = useRef<Vec>({ x: 0, y: 0 });
@@ -31,6 +33,7 @@ export default function JellyCursor() {
 	const hoveringRef = useRef(false);
 	const hiddenRef = useRef(false);
 	const pointerInsideRef = useRef(false);
+	const clickBurstRef = useRef(0);
 
 	const setRef = useRef<{
 		x?: Function;
@@ -122,20 +125,67 @@ export default function JellyCursor() {
 				initializedRef.current = true;
 				posRef.current.x = event.clientX;
 				posRef.current.y = event.clientY;
+				velRef.current.x = 0;
+				velRef.current.y = 0;
 				hideNativeCursor();
 			}
+		};
 
-			gsap.to(posRef.current, {
-				x: event.clientX,
-				y: event.clientY,
-				duration: 0.46,
-				ease: "power3.out",
+		const onPointerDown = (event: MouseEvent) => {
+			if (event.button !== 0) return;
+			if (!initializedRef.current || hiddenRef.current || !pointerInsideRef.current) return;
+
+			const x = targetRef.current.x;
+			const y = targetRef.current.y;
+
+			gsap.killTweensOf(clickBurstRef);
+			clickBurstRef.current = 1;
+			gsap.to(clickBurstRef, {
+				current: 0,
+				duration: 0.24,
+				ease: "power2.out",
 				overwrite: true,
-				onUpdate: () => {
-					velRef.current.x = event.clientX - posRef.current.x;
-					velRef.current.y = event.clientY - posRef.current.y;
-				},
 			});
+
+			for (let i = 0; i < PARTICLE_COUNT; i += 1) {
+				const particle = particleRefs.current[i];
+				if (!particle) continue;
+
+				const angle = Math.random() * Math.PI * 2;
+				const fromRadius = BASE_SIZE * 0.72 + Math.random() * 3.6;
+				const fromX = x + Math.cos(angle) * fromRadius;
+				const fromY = y + Math.sin(angle) * fromRadius;
+				const distance = BASE_SIZE * 0.38 + Math.random() * BASE_SIZE * 0.84;
+				const dx = Math.cos(angle) * distance;
+				const dy = Math.sin(angle) * distance;
+
+				gsap.killTweensOf(particle);
+				gsap.set(particle, {
+					x: fromX,
+					y: fromY,
+					scale: 0.68,
+					opacity: 0.64,
+				});
+
+				gsap
+					.timeline({ defaults: { overwrite: true } })
+					.to(particle, {
+						x: fromX + dx,
+						y: fromY + dy,
+						scale: 0.5,
+						opacity: 0.5,
+						duration: 0.12,
+						ease: "power3.out",
+					})
+					.to(particle, {
+						x: fromX + dx * 0.62,
+						y: fromY + dy * 0.62,
+						scale: 0.08,
+						opacity: 0,
+						duration: 0.14,
+						ease: "power3.in",
+					});
+			}
 		};
 
 		const onOver = (event: MouseEvent) => {
@@ -228,6 +278,14 @@ export default function JellyCursor() {
 			const tx = targetRef.current.x;
 			const ty = targetRef.current.y;
 
+			const prevX = posRef.current.x;
+			const prevY = posRef.current.y;
+			const followStrength = hoveringRef.current ? 0.3 : 0.22;
+			posRef.current.x += (tx - posRef.current.x) * followStrength;
+			posRef.current.y += (ty - posRef.current.y) * followStrength;
+			velRef.current.x = posRef.current.x - prevX;
+			velRef.current.y = posRef.current.y - prevY;
+
 			const magneticTarget = magneticTargetRef.current;
 			const isMagneticHover =
 				Boolean(magneticTarget) &&
@@ -247,16 +305,16 @@ export default function JellyCursor() {
 				if (rect.width > 0 && rect.height > 0) {
 					x = rect.left + rect.width / 2;
 					y = rect.top + rect.height / 2;
-					width = clamp(rect.width + 16, 52, 220);
-					height = clamp(rect.height + 12, 32, 84);
+					width = clamp(rect.width + 14, 44, 200);
+					height = clamp(rect.height + 10, 28, 72);
 					radius = clamp(height * 0.4, 12, 24);
 					rotation = 0;
 					scale = 0;
 				}
 			} else {
 				const interactiveBump = hoveringRef.current ? 4 : 0;
-				width = clamp(BASE_SIZE + scale * 150 + interactiveBump, BASE_SIZE, 104);
-				height = clamp(BASE_SIZE - scale * 20, 30, BASE_SIZE);
+				width = clamp(BASE_SIZE + scale * 130 + interactiveBump, BASE_SIZE, 86);
+				height = clamp(BASE_SIZE - scale * 16, 24, BASE_SIZE);
 				radius = height / 2;
 			}
 
@@ -266,9 +324,12 @@ export default function JellyCursor() {
 			setter.height(height);
 			setter.radius(radius);
 			setter.rotate(rotation);
-			setter.scaleX(1 + scale);
-			setter.scaleY(1 - scale * 1.4);
-			setter.opacity(hiddenRef.current || !pointerInsideRef.current ? 0 : 1);
+			const clickScale = Math.max(0.78, 1 - clickBurstRef.current * 0.22);
+			setter.scaleX((1 + scale) * clickScale);
+			setter.scaleY((1 - scale * 1.4) * clickScale);
+			const visibleOpacity = hiddenRef.current || !pointerInsideRef.current ? 0 : 1;
+			const clickDampen = 1 - clickBurstRef.current * 0.24;
+			setter.opacity(visibleOpacity * clickDampen);
 
 			if (dotRef.current) {
 				dotRef.current.style.left = `${tx}px`;
@@ -278,6 +339,7 @@ export default function JellyCursor() {
 
 		window.addEventListener("mousemove", onMove, { passive: true });
 		window.addEventListener("mouseover", onOver, { passive: true });
+		window.addEventListener("mousedown", onPointerDown, { passive: true });
 		window.addEventListener("mouseleave", onWindowMouseLeave);
 		window.addEventListener("mouseenter", onWindowMouseEnter);
 		window.addEventListener("blur", onWindowBlur);
@@ -291,6 +353,7 @@ export default function JellyCursor() {
 		return () => {
 			window.removeEventListener("mousemove", onMove);
 			window.removeEventListener("mouseover", onOver);
+			window.removeEventListener("mousedown", onPointerDown);
 			window.removeEventListener("mouseleave", onWindowMouseLeave);
 			window.removeEventListener("mouseenter", onWindowMouseEnter);
 			window.removeEventListener("blur", onWindowBlur);
@@ -300,7 +363,7 @@ export default function JellyCursor() {
 			window.removeEventListener("pagehide", onPageHide);
 			document.removeEventListener("visibilitychange", onVisibilityChange);
 			gsap.ticker.remove(animate);
-			gsap.killTweensOf(posRef.current);
+			gsap.killTweensOf(particleRefs.current.filter(Boolean));
 			showNativeCursor();
 		};
 	}, []);
@@ -311,16 +374,27 @@ export default function JellyCursor() {
 
 	return (
 		<>
+			{Array.from({ length: PARTICLE_COUNT }).map((_, index) => (
+				<div
+					key={`jelly-p-${index}`}
+					ref={(el) => {
+						particleRefs.current[index] = el;
+					}}
+					className="pointer-events-none fixed left-0 top-0 z-[10040] h-[1.5px] w-[1.5px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/90 dark:bg-white/90"
+					style={{ opacity: 0 }}
+				/>
+			))}
+
 			<div
 				ref={blobRef}
-				className="pointer-events-none fixed left-0 top-0 z-[9999] h-[40px] w-[40px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-black will-change-transform dark:border-white"
-				style={{ backdropFilter: "invert(100%)", opacity: 0 }}
+				className="pointer-events-none fixed left-0 top-0 z-[9999] h-[32px] w-[32px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white mix-blend-difference will-change-transform"
+				style={{ opacity: 0 }}
 			/>
 
 			<div
 				ref={dotRef}
-				className="pointer-events-none fixed left-0 top-0 z-[10000] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
-				style={{ backdropFilter: "invert(100%)", opacity: 0 }}
+				className="pointer-events-none fixed left-0 top-0 z-[10000] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference"
+				style={{ opacity: 0 }}
 			/>
 		</>
 	);
