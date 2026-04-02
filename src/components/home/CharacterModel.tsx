@@ -50,13 +50,62 @@ const MODEL_PRESETS: Record<
     desktopY: -1,
     mobileY: -1.08,
   },
+  "/models/withAudio.glb": {
+    // Projects 页 withAudio 小人的镜头参数：控制模型本体大小和上下位置。
+    desktopX: 0,
+    mobileX: 0,
+    desktopScale: 1.45,
+    mobileScale: 2.1,
+    desktopY: -1.34,
+    mobileY: -1.08,
+  },
 };
 
 type CharacterModelProps = {
   modelPath?: string;
+  lockHeadPitch?: boolean;
+  fixedHeadPitch?: number;
+  yawRange?: number;
+  lightConfig?: Partial<CharacterLightConfig>;
 };
 
-function Avatar({ isMobile, modelPath }: { isMobile: boolean; modelPath: string }) {
+type CharacterLightConfig = {
+  ambientIntensity: number;
+  keyLightPosition: [number, number, number];
+  keyLightIntensity: number;
+  fillLightPosition: [number, number, number];
+  fillLightIntensity: number;
+  spotLightPosition: [number, number, number];
+  spotLightAngle: number;
+  spotLightPenumbra: number;
+  spotLightIntensity: number;
+};
+
+const DEFAULT_LIGHT_CONFIG: CharacterLightConfig = {
+  ambientIntensity: 1.35,
+  keyLightPosition: [3, 4, 5],
+  keyLightIntensity: 1,
+  fillLightPosition: [-3, 2, 4],
+  fillLightIntensity: 0.3,
+  spotLightPosition: [0, 6, 3],
+  spotLightAngle: 0.35,
+  spotLightPenumbra: 1,
+  spotLightIntensity: 1,
+};
+
+function Avatar({
+  isMobile,
+  modelPath,
+  lockHeadPitch,
+  fixedHeadPitch,
+  yawRange,
+}: {
+  isMobile: boolean;
+  modelPath: string;
+  lockHeadPitch: boolean;
+  fixedHeadPitch: number;
+  yawRange: number;
+}) {
   // 使用新的模型路径，请确保你的文件路径是正确的
   const { scene } = useGLTF(modelPath);
   const preset = MODEL_PRESETS[modelPath] ?? MODEL_PRESETS["/models/stand.glb"];
@@ -89,10 +138,8 @@ function Avatar({ isMobile, modelPath }: { isMobile: boolean; modelPath: string 
 useFrame(() => {
     const head = headRef.current;
 
-    // 1. 解决【幅度小】的问题：调大乘数
-    // 以前上下是 0.12，现在我调大到了 0.35。数字越大，他抬头和低头的动作就越夸张。
-    const targetY = globalMouse.x * 0.3;  // 左右幅度
-    const targetX = -globalMouse.y * 0.35; // 上下幅度（大幅增加）
+  const targetY = THREE.MathUtils.clamp(globalMouse.x * 0.3, -yawRange, yawRange);
+  const targetX = lockHeadPitch ? fixedHeadPitch : -globalMouse.y * 0.35;
 
     // 2. 解决【速度慢、卡顿】的问题：调大 lerp 的第三个参数（灵敏度）
     // 以前是 0.05（很粘滞），现在调到 0.15（非常跟手、清脆）。
@@ -102,9 +149,8 @@ useFrame(() => {
       head.rotation.y = THREE.MathUtils.lerp(head.rotation.y, targetY, lerpSpeed);
       head.rotation.x = THREE.MathUtils.lerp(head.rotation.x, targetX, lerpSpeed);
     } else if (rootRef.current) {
-      // 如果找不到头骨，全身跟着动的幅度也要相应调大一点点
-      const rootTargetY = globalMouse.x * 0.15 + 0.08;
-      const rootTargetX = -globalMouse.y * 0.15;
+      const rootTargetY = THREE.MathUtils.clamp(globalMouse.x * 0.15 + 0.08, -yawRange * 0.7, yawRange * 0.7);
+      const rootTargetX = lockHeadPitch ? fixedHeadPitch * 0.28 : -globalMouse.y * 0.15;
       
       rootRef.current.rotation.y = THREE.MathUtils.lerp(rootRef.current.rotation.y, rootTargetY, lerpSpeed);
       rootRef.current.rotation.x = THREE.MathUtils.lerp(rootRef.current.rotation.x, rootTargetX, lerpSpeed);
@@ -122,8 +168,21 @@ useFrame(() => {
     </group>
   );
 }
-export default function CharacterModel({ modelPath = "/models/stand.glb" }: CharacterModelProps) {
+export default function CharacterModel({
+  modelPath = "/models/stand.glb",
+  lockHeadPitch = false,
+  fixedHeadPitch = -0.2,
+  yawRange = 0.45,
+  lightConfig,
+}: CharacterModelProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const lights: CharacterLightConfig = {
+    ...DEFAULT_LIGHT_CONFIG,
+    ...lightConfig,
+    keyLightPosition: lightConfig?.keyLightPosition ?? DEFAULT_LIGHT_CONFIG.keyLightPosition,
+    fillLightPosition: lightConfig?.fillLightPosition ?? DEFAULT_LIGHT_CONFIG.fillLightPosition,
+    spotLightPosition: lightConfig?.spotLightPosition ?? DEFAULT_LIGHT_CONFIG.spotLightPosition,
+  };
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)");
@@ -155,20 +214,26 @@ export default function CharacterModel({ modelPath = "/models/stand.glb" }: Char
         // alpha: true 强制画布背景透明，彻底消除视觉硬框
         gl={{ alpha: true, antialias: true }}
       >
-        <ambientLight intensity={1.35} />
-        <directionalLight position={[3, 4, 5]} intensity={1.8} />
-        <directionalLight position={[-3, 2, 4]} intensity={0.7} />
+        <ambientLight intensity={lights.ambientIntensity} />
+        <directionalLight position={lights.keyLightPosition} intensity={lights.keyLightIntensity} />
+        <directionalLight position={lights.fillLightPosition} intensity={lights.fillLightIntensity} />
         <spotLight
-          position={[0, 6, 3]}
-          angle={0.35}
-          penumbra={1}
-          intensity={1}
+          position={lights.spotLightPosition}
+          angle={lights.spotLightAngle}
+          penumbra={lights.spotLightPenumbra}
+          intensity={lights.spotLightIntensity}
         />
 
         <Suspense fallback={null}>
           {/* Float 组件让模型有轻微的呼吸/悬浮感 */}
           <Float speed={1.5} rotationIntensity={0} floatIntensity={0.8}>
-            <Avatar isMobile={isMobile} modelPath={modelPath} />
+            <Avatar
+              isMobile={isMobile}
+              modelPath={modelPath}
+              lockHeadPitch={lockHeadPitch}
+              fixedHeadPitch={fixedHeadPitch}
+              yawRange={yawRange}
+            />
           </Float>
         </Suspense>
       </Canvas>
@@ -178,3 +243,4 @@ export default function CharacterModel({ modelPath = "/models/stand.glb" }: Char
 
 // 预加载模型，防止初次加载时闪烁
 useGLTF.preload("/models/stand.glb");
+useGLTF.preload("/models/withAudio.glb");

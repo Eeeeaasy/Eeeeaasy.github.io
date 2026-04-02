@@ -10,13 +10,13 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Skills", href: "/skills" },
     { label: "Inspiration", href: "/inspiration" },
-    { label: "Projects", href: "/projects" },
+    { label: "Demo", href: "/projects" },
   ];
 
   const resumeItems = [
     { label: "Skills", href: "/skills" },
     { label: "Inspiration", href: "/inspiration" },
-    { label: "Projects", href: "/projects" },
+    { label: "Demo", href: "/projects" },
   ];
 
   const setMenuHash = (open: boolean) => {
