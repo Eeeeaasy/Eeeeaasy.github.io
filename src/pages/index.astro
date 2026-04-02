@@ -3,6 +3,7 @@ import Navbar from "../components/home/Navbar";
 import HomeSection from "../components/home/HomeSection";
 import ColorButton from "../components/home/ColorButton";
 import JellyCursor from "../components/ui/JellyCursor";
+import ThemeHeadScript from "../components/ThemeHeadScript.astro";
 import "../styles/global.css";
 ---
 
@@ -10,6 +11,7 @@ import "../styles/global.css";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <ThemeHeadScript />
     <title>Eeeeaasy! | Portfolio</title>
     <meta
       name="description"
@@ -18,7 +20,7 @@ import "../styles/global.css";
   </head>
   
   <!-- 核心改动 1：body 默认浅色背景，附带 dark 类时响应为暗黑背景 -->
-  <body class="bg-white text-neutral-900 antialiased transition-colors duration-500 ease-in-out dark:bg-neutral-950 dark:text-neutral-100">
+  <body class="overflow-x-hidden bg-white text-neutral-900 antialiased transition-colors duration-500 ease-in-out dark:bg-neutral-950 dark:text-neutral-100">
     <div class="relative min-h-screen">
       
       <!-- 核心改动 2：全局星空渐变背景光。白天变淡黑色以适应浅背景，夜晚变成白色提亮暗黑背景 -->

@@ -27,8 +27,7 @@ export default function InspirationSection() {
   return (
     <section id="inspiration" className="relative scroll-mt-24 py-16 md:py-24 outline-none focus:outline-none">
       <div 
-        className="absolute z-[-1] pointer-events-none overflow-hidden select-none w-screen" 
-        style={{ left: '50%', transform: 'translateX(-50%)' }}
+        className="absolute inset-x-0 z-[-1] pointer-events-none select-none"
       >
         <div className="sticky top-0 flex h-screen w-full items-center justify-start opacity-95">
           
@@ -37,7 +36,7 @@ export default function InspirationSection() {
               消失时: dark:delay-0 dark:duration-0 切黑夜时立马隐身
           */}
           <video 
-            className="w-[200%] md:w-[80vw] lg:w-[55vw] absolute object-cover -ml-5 lg:-ml-5 -mt-20 lg:-mt-32 !outline-none !border-none !ring-0 focus:outline-none focus:ring-0 select-none pointer-events-none transition-opacity duration-1000 delay-300 dark:duration-0 dark:delay-0 opacity-100 dark:opacity-0" 
+            className="w-[200%] md:w-[80vw] lg:w-[55vw] absolute object-cover -ml-24 md:-ml-28 lg:-ml-85 -mt-20 lg:-mt-32 !outline-none !border-none !ring-0 focus:outline-none focus:ring-0 select-none pointer-events-none transition-opacity duration-1000 delay-300 dark:duration-0 dark:delay-0 opacity-100 dark:opacity-0" 
             autoPlay 
             playsInline 
             loop 
@@ -57,7 +56,7 @@ export default function InspirationSection() {
             src="/pictures/dark.png" 
             alt="Sleeping at night"
             loading="lazy"
-            className="w-[200%] md:w-[80vw] lg:w-[31vw] absolute object-cover ml-10 lg:ml-[10vw] -mt-20 lg:mt-2 pointer-events-none select-none transition-opacity duration-0 delay-0 dark:duration-1000 dark:delay-200 opacity-0 dark:opacity-100" 
+            className="w-[200%] md:w-[80vw] lg:w-[31vw] absolute object-cover -ml-16 md:-ml-20 lg:-ml-[6vw] -mt-20 lg:mt-2 pointer-events-none select-none transition-opacity duration-0 delay-0 dark:duration-1000 dark:delay-200 opacity-0 dark:opacity-100" 
           />
 
         </div>

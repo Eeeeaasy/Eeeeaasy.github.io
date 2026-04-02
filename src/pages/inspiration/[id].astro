@@ -5,6 +5,7 @@ import ColorButton from "../../components/home/ColorButton";
 import JellyCursor from "../../components/ui/JellyCursor";
 import InspirationCardEditor from "../../components/inspiration/InspirationCardEditor";
 import InspirationPageSection from "../../components/inspiration/InspirationPageSection";
+import ThemeHeadScript from "../../components/ThemeHeadScript.astro";
 import { INSPIRATION_CARDS, getAdjacentCardIds } from "../../data/inspirationCards";
 import "../../styles/global.css";
 
@@ -23,6 +24,7 @@ const { prevId, nextId } = getAdjacentCardIds(card.id);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <ThemeHeadScript />
     <title>{`Inspiration ${card.id} | Eeeeaasy`}</title>
     <ClientRouter />
   </head>

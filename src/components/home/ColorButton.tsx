@@ -10,22 +10,26 @@ export default function ColorButton() {
     document.body.style.color = "";
     document.body.style.transition = "background-color 0.5s ease-in-out, color 0.5s ease-in-out";
 
-    // 可以在这里判断当前系统的偏好，这里默认设置为白天 (浅色)
-    // 初始状态下不要有 "dark" class
-    document.documentElement.classList.remove("dark");
+    const root = document.documentElement;
+    const savedTheme = window.localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const nextIsDark =
+      savedTheme === "dark"
+        ? true
+        : savedTheme === "light"
+          ? false
+          : root.classList.contains("dark") || prefersDark;
+
+    root.classList.toggle("dark", nextIsDark);
+    window.localStorage.setItem("theme", nextIsDark ? "dark" : "light");
+    setIsDark(nextIsDark);
   }, []);
 
   const changeTheme = () => {
-    // 如果当前是 暗色 -> 切换成亮色
-    if (isDark) {
-      document.documentElement.classList.remove("dark");
-      setIsDark(false);
-    } 
-    // 如果当前是 亮色 -> 切换成暗色
-    else {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    }
+    const nextIsDark = !isDark;
+    document.documentElement.classList.toggle("dark", nextIsDark);
+    window.localStorage.setItem("theme", nextIsDark ? "dark" : "light");
+    setIsDark(nextIsDark);
   };
 
   return (
