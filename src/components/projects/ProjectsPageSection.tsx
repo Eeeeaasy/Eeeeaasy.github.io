@@ -41,7 +41,7 @@ export default function ProjectsPageSection() {
         </h2>
       </Reveal> */}
 
-      <div className="grid items-stretch gap-6 md:grid-cols-4">
+      {/* <div className="grid items-stretch gap-6 md:grid-cols-4">
         {projects.map((project, index) => (
           <Reveal key={project.title} delay={index * 110} y={24} className="h-full">
             <article className="group h-full rounded-[2rem] border border-gray-500/20 bg-gray-500/10 p-6 transition hover:border-gray-500/30 hover:bg-gray-500/20">
@@ -60,7 +60,7 @@ export default function ProjectsPageSection() {
             </article>
           </Reveal>
         ))}
-      </div>
+      </div> */}
     </section>
   );
 }

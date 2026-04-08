@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function Navbar() {
+type NavbarProps = {
+  edgeSpread?: boolean;
+};
+
+export default function Navbar({ edgeSpread = true }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [resumeOpen, setResumeOpen] = useState(false);
@@ -88,8 +92,9 @@ export default function Navbar() {
     >
       <div
         className={`
-          mx-auto flex w-full max-w-7xl items-center justify-between px-6 md:px-10
+          mx-auto flex w-full items-center justify-between
           transition-all duration-500
+          ${edgeSpread ? "max-w-none px-12 md:px-16" : "max-w-7xl px-6 md:px-10"}
           ${scrolled ? "h-14" : "h-16"}
         `}
       >
@@ -141,7 +146,7 @@ export default function Navbar() {
             </button>
 
             {resumeOpen && (
-              <div className="absolute left-1/2 mt-2 w-44 -translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-slate-900/95 p-1 text-sm shadow-lg shadow-black/30">
+              <div className="absolute left-1/2 mt-2 w-44 -translate-x-1/2 overflow-hidden rounded-2xl border border-white/15 bg-transparent p-1 text-sm shadow-lg shadow-black/30 backdrop-blur-md">
                 {resumeItems.map((item) => (
                   <a
                     key={item.href}
@@ -150,7 +155,7 @@ export default function Navbar() {
                       setResumeOpen(false);
                       setMenuHash(false);
                     }}
-                    className="block rounded-xl px-3 py-2 text-center text-white/80 transition hover:bg-white/10 hover:text-white"
+                    className="block rounded-xl px-3 py-2 text-center text-neutral-800/90 transition hover:bg-black/5 hover:text-neutral-950 dark:text-white/85 dark:hover:bg-white/10 dark:hover:text-white"
                   >
                     {item.label}
                   </a>
@@ -198,7 +203,7 @@ export default function Navbar() {
             setMenuHash(false);
           }}
         />
-        <div className="absolute left-4 right-4 top-[4.5rem] rounded-2xl border border-white/15 bg-slate-900/95 p-4 shadow-xl shadow-black/30">
+        <div className="absolute left-4 right-4 top-[4.5rem] rounded-2xl border border-white/15 bg-transparent p-4 shadow-xl shadow-black/30 backdrop-blur-md">
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               <a
@@ -208,7 +213,7 @@ export default function Navbar() {
                   setMobileOpen(false);
                   setMenuHash(false);
                 }}
-                className="rounded-xl px-3 py-2.5 text-sm text-white/85 transition hover:bg-white/10 hover:text-white"
+                className="rounded-xl px-3 py-2.5 text-sm text-neutral-800/90 transition hover:bg-black/5 hover:text-neutral-950 dark:text-white/85 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 {item.label}
               </a>
