@@ -11,7 +11,7 @@ export type PlayerQueueTrack = {
 // 只需要在这里维护播放器顺序、图片和名称。
 export const PLAYER_QUEUE: PlayerQueueTrack[] = [
   {
-    title: "凌晨四点的霓虹",
+    title: "凌晨四点",
     subtitle: "霓虹灯下的城市独白",
     artist: "Eeeeaasy Nights",
     cover: "/pictures/player/picture1.jpg",
