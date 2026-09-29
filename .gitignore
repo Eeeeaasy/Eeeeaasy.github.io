@@ -1,5 +1,7 @@
 # build output
 dist/
+# local source models (production-ready models live in public/models)
+public/models-original/
 # generated types
 .astro/
 
